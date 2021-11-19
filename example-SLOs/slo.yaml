@@ -1,0 +1,20 @@
+apiVersion: openslo/v1alpha
+kind: SLO
+metadata:
+  displayName: Aggregate SLO from SLOs
+  name: slo-aggregate
+spec:
+  indicator:
+    objectiveMetric:
+      source: http://localhost:9090
+      queryType: promql
+#      query: component:latency:slo_ok_5m{component="prod-comp-1"}
+#      query: sum(up{instance="localhost:9100", job="node", node="klapek"} or vector(0)) – can't avg_over_time this :(
+      query: up{instance="localhost:9100", job="node", node="klapek"}
+  objectives:
+  - target: 0.95
+  timeWindows:
+  - count: 28
+    unit: Day
+    isRolling: true
+

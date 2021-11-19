@@ -1,0 +1,21 @@
+apiVersion: openslo/v1alpha
+kind: SLO
+metadata:
+  displayName: SLO for CPU package temperature
+  name: hwmon-cpu-temp-slo
+spec:
+  budgetingMethod: Occurrences
+  description: CPU temp on my laptop
+  indicator:
+    thresholdMetric:
+      source: http://localhost:9090
+      queryType: promql
+      query: node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1",node="klapek"}
+  objectives:
+  - op: lt
+    value: 90
+    target: 0.95
+  timeWindows:
+  - count: 28
+    unit: Day
+    isRolling: true

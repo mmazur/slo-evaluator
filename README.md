@@ -1,2 +1,2 @@
-# oslo-evaluator
+# slo-evaluator
 Evaluate&amp;Store Engine for OpenSLO–defined Objectives
