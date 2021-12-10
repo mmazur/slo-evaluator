@@ -1,0 +1,26 @@
+apiVersion: openslo/v1alpha
+kind: SLO
+metadata:
+  displayName: SLO for multiple ThinkPad temps
+  name: hwmon-cpu-temp-slo
+spec:
+  budgetingMethod: Occurrences
+  description: CPU temp on my laptop
+  indicator:
+    thresholdMetric:
+      source: http://localhost:9090
+      queryType: promql
+      # This evaluates to multiple metrics that differ by `sensor` label
+      query: node_hwmon_temp_celsius{chip="platform_thinkpad_hwmon",node="klapek"}
+      metadata:
+        multiSystem: true # Expect to get data for an arbitrary number of (sub)systems
+        multiSystemIdFields:
+          labels: sensor # Use the `sensor` label to differentiate between systems
+  objectives:
+  - op: lt
+    value: 68 # °C
+    target: 0.95
+  timeWindow:
+  - count: 28
+    unit: Day
+    isRolling: true

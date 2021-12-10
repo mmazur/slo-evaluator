@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import logging
 
@@ -14,6 +14,7 @@ class OSLOElementNotSupported(Exception):
 
 class SLIType(Enum):
     OBJECTIVE = "objectiveMetric"
+    THRESHOLD = "thresholdMetric"
 
 
 class SLIQueryType(Enum):
@@ -27,6 +28,8 @@ class SLI:
     source: str
     query: str
     query_type: SLIQueryType
+    multi_system: bool = False # Does this query return values for a single or multiple systems
+    multi_system_id_fields: dict = field(default_factory=dict) # What to use to identify different systems, e.g. 'labels'
 
 
 class TimeWindowUnit(Enum):
@@ -68,6 +71,7 @@ class SLO:
     time_window: TimeWindow
     op: SLOOp = None
     value: float = None
+    multi_system_aggregate: bool = True # For multiSystem SLIs also generate an aggregate SLO
 
     def evaluate(self, ts="Not supported yet"):
         """Evaluate the value of the SLO at the moment or at timestamp if provided.
