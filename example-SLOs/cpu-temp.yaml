@@ -15,7 +15,7 @@ spec:
   - op: lt
     value: 90
     target: 0.95
-  timeWindows:
+  timeWindow:
   - count: 28
     unit: Day
     isRolling: true

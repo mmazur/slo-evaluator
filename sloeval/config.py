@@ -19,18 +19,21 @@ def load_slo_file(path):
         if "objectiveMetric" in y["spec"]["indicator"]:
             slitype = oslo.SLIType.OBJECTIVE
         else:
-            raise oslo.OSLOElementNotSupported("Unsupported indicator type: {}".format(list( y["spec"]["indicator"].keys())))
+            raise oslo.OSLOElementNotSupported(
+                "Unsupported indicator type: {}".format(list(y["spec"]["indicator"].keys())))
 
         slisource = y["spec"]["indicator"][slitype.value]["source"]
-        sliquery_type = oslo.SLIQueryType[y["spec"]["indicator"][slitype.value]["queryType"].upper()]
+        sliquery_type = oslo.SLIQueryType[y["spec"]
+                                          ["indicator"][slitype.value]["queryType"].upper()]
         sliquery = y["spec"]["indicator"][slitype.value]["query"]
-        newsli = oslo.SLI(type=slitype, source=slisource, query_type=sliquery_type, query=sliquery)
+        newsli = oslo.SLI(type=slitype, source=slisource,
+                          query_type=sliquery_type, query=sliquery)
 
-        twcount = y["spec"]["timeWindows"][0]["count"]
-        twunit = oslo.TimeWindowUnit[y["spec"]["timeWindows"][0]["unit"].upper()]
-        twrolling = y["spec"]["timeWindows"][0]["isRolling"]
+        twcount = y["spec"]["timeWindow"][0]["count"]
+        twunit = oslo.TimeWindowUnit[y["spec"]
+                                     ["timeWindow"][0]["unit"].upper()]
+        twrolling = y["spec"]["timeWindow"][0]["isRolling"]
         tw = oslo.TimeWindow(count=twcount, unit=twunit, rolling=twrolling)
-
 
         name = y["metadata"]["name"]
         target = y["spec"]["objectives"][0]["target"]
@@ -49,8 +52,8 @@ def load_configs(slopath="SLOs", sourcespath="sources"):
             if newslo:
                 SLOs.append(newslo)
         except BaseException as err:
-            logging.error(f'Something went wrong while parsing "{slofile}", this SLO will not be evaluated.')
+            logging.error(
+                f'Something went wrong while parsing "{slofile}", this SLO will not be evaluated.')
             logging.error(f'Encountered error: {err}')
-    logging.info(f"SLO config parsing complete, got {len(SLOs)} SLOs to evaluate")
-
-
+    logging.info(
+        f"SLO config parsing complete, got {len(SLOs)} SLOs to evaluate")
