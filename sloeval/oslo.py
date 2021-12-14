@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-
-from . import prom
+from prometheus_api_client import PrometheusConnect
 
 # Once OpenSLO spec is stable it might be good to replace this with just using the spec data structure directly.
 # OTOH that might not end up being super viable if the code needs to do enough complicated things.
@@ -78,11 +77,11 @@ class SLO:
         
         Returns a tuple of (SLO isMet bool, SLO value float)"""
         if self.sli.type == SLIType.OBJECTIVE and self.sli.query_type == SLIQueryType.PROMQL:
-            pc = prom.PrometheusClient(hosturl=self.sli.source)
+            pc = PrometheusConnect(url=self.sli.source)
             querystr = f'avg_over_time({self.sli.query}[{self.time_window.prom_shorthand()}])'
             logging.debug(f'Running promql query: "{querystr}"')
-            result = pc.query(querystr)
-            res_value = int(result["result"][0]["value"][1])
+            result = pc.custom_query(querystr)
+            res_value = int(result[0]["value"][1])
             res_ismet = res_value >= self.target
             return(res_ismet, res_value)
         else:
