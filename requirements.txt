@@ -1,2 +1,4 @@
-PyYAML
+click
+pandas
 prometheus-api-client
+PyYAML
