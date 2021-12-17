@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
+
+import pandas as pd
 from prometheus_api_client import PrometheusConnect
 
 # Once OpenSLO spec is stable it might be good to replace this with just using the spec data structure directly.
@@ -18,6 +20,7 @@ class SLIType(Enum):
 
 class SLIQueryType(Enum):
     PROMQL = "promql"
+    PANDAS_CSV = "pandas/csv"
 
 
 @dataclass
@@ -72,17 +75,40 @@ class SLO:
     value: float = None
     multi_system_aggregate: bool = True # For multiSystem SLIs also generate an aggregate SLO
 
+
+    def _evaluate_window_performance_on_threshold(self, df, op, value):
+        """Takes a dataframe with index "timestamps" and "value" column.
+
+        Returns window performance as float."""
+        querystr = f"value {op.value} {value}"
+        total = df.value.count()
+        matching = df.query(querystr).value.count()
+
+        return matching/total
+
+
     def evaluate(self, ts="Not supported yet"):
         """Evaluate the value of the SLO at the moment or at timestamp if provided.
-        
+
         Returns a tuple of (SLO isMet bool, SLO value float)"""
         if self.sli.type == SLIType.OBJECTIVE and self.sli.query_type == SLIQueryType.PROMQL:
             pc = PrometheusConnect(url=self.sli.source)
+            # TODO: does avg_over_time look at all data points for large enough time windows?
             querystr = f'avg_over_time({self.sli.query}[{self.time_window.prom_shorthand()}])'
-            logging.debug(f'Running promql query: "{querystr}"')
+            logging.debug(f"Running promql query: `{querystr}`")
             result = pc.custom_query(querystr)
+            #TODO: change to MetricSnapshotDataFrame?
             res_value = int(result[0]["value"][1])
             res_ismet = res_value >= self.target
             return(res_ismet, res_value)
+        elif self.sli.type == SLIType.THRESHOLD and self.sli.query_type == SLIQueryType.PANDAS_CSV:
+            rawdf = pd.read_csv(self.sli.source, index_col='timestamp')
+            df = rawdf.query(self.sli.query)
+            #TODO: apply time window first
+            perf = self._evaluate_window_performance_on_threshold(df, self.op, self.value)
+            res_ismet = perf >= self.target
+
+            return (res_ismet, perf)
         else:
+            logging.error(f"Unsupported combination of SLI type '{self.sli.type} and query type {self.sli.query_type}")
             return (None, None)

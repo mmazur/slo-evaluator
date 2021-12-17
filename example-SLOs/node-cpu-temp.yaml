@@ -1,19 +1,19 @@
 apiVersion: openslo/v1alpha
 kind: SLO
 metadata:
-  displayName: SLO for CPU package temperature
-  name: hwmon-cpu-temp-slo
+  displayName: SLO for CPU temperature
+  name: node-cpu-temp-slo
 spec:
   budgetingMethod: Occurrences
-  description: CPU temp on my laptop
   indicator:
     thresholdMetric:
-      source: http://localhost:9090
-      queryType: promql
-      query: node_hwmon_temp_celsius{chip="platform_coretemp_0",sensor="temp1",node="klapek"}
+      source: test/node_temps.csv
+      queryType: pandas/csv
+      # slo-evaluator uses Pandas lib internally, therefore the query is a Pandas dataframe query
+      query: __name__ == "node_temp_celsius" and node=="klapek" and sensor=="cpu"
   objectives:
   - op: lt
-    value: 90
+    value: 90 # °C
     target: 0.95
   timeWindow:
   - count: 28

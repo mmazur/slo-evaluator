@@ -27,7 +27,7 @@ def load_slo_file(path):
 
         metric = y["spec"]["indicator"][slitype.value]
         slisource = metric["source"]
-        sliquery_type = oslo.SLIQueryType[metric["queryType"].upper()]
+        sliquery_type = oslo.SLIQueryType[metric["queryType"].replace("/", "_").upper()]
         sliquery = metric["query"]
         slimulti_system = oslo.SLI.multi_system # get the default value from the data class
         slimulti_system_id_fields = {} # not possible to get the default value from the data class
