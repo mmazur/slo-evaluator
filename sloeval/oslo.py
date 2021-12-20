@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 import logging
 
@@ -53,9 +54,16 @@ class TimeWindow:
     unit: TimeWindowUnit
     rolling: bool
 
-    def prom_shorthand(self):
-        """Return a prom-compatible shorthand string of the time window."""
-        # TODO: make sure this is actually prom-compatible; there was golib for this that set the standard…
+    def to_datetime(self, endtime):
+        """Returns the TimeWindow as a datetime object relative to `endtime`."""
+        td = pd.to_timedelta(self.count, self.unit.value)
+        return endtime-td
+
+
+    def to_prom_shorthand(self):
+        """Return a prom-compatible shorthand string of the time window.
+        
+        Based on https://prometheus.io/docs/prometheus/latest/querying/basics/#time-durations"""
         return f"{self.count}{self.unit.value}"
 
 
@@ -94,24 +102,34 @@ class SLO:
             return retonnodata
 
 
-    def evaluate(self, ts="Not supported yet"):
-        """Evaluate the value of the SLO at the moment or at timestamp if provided.
+    def evaluate(self, endtime=None):
+        """Evaluate the value of the SLO at the moment or at `endtime` if provided.
 
         Returns a tuple of (SLO isMet bool, SLO value float)"""
+
+        if not endtime:
+            endtime = pd.Timestamp.now()
+        starttime = self.time_window.to_datetime(endtime)
+
         if self.sli.type == SLIType.OBJECTIVE and self.sli.query_type == SLIQueryType.PROMQL:
             pc = PrometheusConnect(url=self.sli.source)
             # TODO: does avg_over_time look at all data points for large enough time windows?
-            querystr = f'avg_over_time({self.sli.query}[{self.time_window.prom_shorthand()}])'
+            querystr = f'avg_over_time({self.sli.query}[{self.time_window.to_prom_shorthand()}])'
             logging.debug(f"Running promql query: `{querystr}`")
             result = pc.custom_query(querystr)
             #TODO: change to MetricSnapshotDataFrame?
             res_value = int(result[0]["value"][1])
             res_ismet = res_value >= self.target
+
             return(res_ismet, res_value)
         elif self.sli.type == SLIType.THRESHOLD and self.sli.query_type == SLIQueryType.PANDAS_CSV:
-            rawdf = pd.read_csv(self.sli.source, index_col='timestamp')
+            rawdf = pd.read_csv(self.sli.source, index_col='timestamp', parse_dates=['timestamp'])
+            if str(rawdf.index.dtype).startswith("int") or str(rawdf.index.dtype).startswith("float"):
+                # Most likely a unix epoch timestamp, convert it to DateTimeIndex
+                newindex = rawdf.index.to_series().apply(lambda ts: datetime.fromtimestamp(ts))
+                rawdf.set_index(newindex, inplace=True)
             df = rawdf.query(self.sli.query)
-            #TODO: apply time window first
+            df = df[(df.index >= starttime) & (df.index <= endtime)]
             perf = self._evaluate_window_performance_on_threshold(df, self.op, self.value)
             res_ismet = perf >= self.target
 
