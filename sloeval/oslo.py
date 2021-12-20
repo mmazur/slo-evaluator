@@ -34,18 +34,21 @@ class SLI:
     multi_system_id_fields: dict = field(default_factory=dict) # What to use to identify different systems, e.g. 'labels'
 
 
+# TODO: this is likely a horrible way to represent TimeWindows internally
 class TimeWindowUnit(Enum):
     MINUTE = "m"
     HOUR = "h"
     DAY = "d"
     WEEK = "w"
-    MONTH = "M"
-    QUARTER = "Q"
-    YEAR = "Y"
+    # TODO: reenable this when non–rolling time windows support gets added
+    # MONTH = "M"
+    # QUARTER = "Q"
+    # YEAR = "Y"
 
 
 @dataclass
 class TimeWindow:
+    """Only supports "rolling=True" for now."""
     count: int
     unit: TimeWindowUnit
     rolling: bool
