@@ -4,6 +4,8 @@ import click
 import pandas as pd
 import numpy as np
 
+from pandas.tseries.offsets import DateOffset
+
 
 def_count = 100
 def_metricname = "node_temp_celsius"
@@ -12,17 +14,18 @@ def_maxval = 100
 def_idcolheader = "id"
 def_step = 10 # seconds
 
-startts = 1634000000
+starttime = "2021-11-01 00:00:00"
 rng = np.random.default_rng()
 
 
 def gen_metric(count=def_count, step=def_step, metricname=def_metricname,
                minval=def_minval, maxval=def_maxval, columns=[]):
-    timestamps = pd.DataFrame(range(startts, startts+(count*step), step), columns=["timestamp"])
+    index = pd.date_range(starttime, periods=count, freq=DateOffset(seconds=step))
+
     values = pd.DataFrame(rng.integers(minval, maxval, size=(count, 1)), columns=["value"])
 
-    df = pd.concat([timestamps, values], axis=1)
-    df.set_index("timestamp", inplace=True)
+    df = values.set_index(index)
+    df.index.rename("timestamp", inplace=True)
 
     df.insert(0, "__name__", metricname)
 
