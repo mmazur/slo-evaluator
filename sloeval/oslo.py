@@ -79,15 +79,19 @@ class SLO:
     multi_system_aggregate: bool = True # For multiSystem SLIs also generate an aggregate SLO
 
 
-    def _evaluate_window_performance_on_threshold(self, df, op, value):
-        """Takes a dataframe with index "timestamps" and "value" column.
+    def _evaluate_window_performance_on_threshold(self, df, op, value, retonnodata=0):
+        """Takes a dataframe with index "timestamp" and "value" column.
+        Compares each value in `df` by doing `op`eration against `value`.
 
-        Returns window performance as float."""
+        Returns window performance (matches/total) as float.
+        If dataframe is empty returns `retonnodata`."""
         querystr = f"value {op.value} {value}"
         total = df.value.count()
-        matching = df.query(querystr).value.count()
-
-        return matching/total
+        if total:
+            matching = df.query(querystr).value.count()
+            return matching/total
+        else:
+            return retonnodata
 
 
     def evaluate(self, ts="Not supported yet"):
