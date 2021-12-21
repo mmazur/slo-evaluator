@@ -29,15 +29,18 @@ def load_slo_file(path):
         slisource = metric["source"]
         sliquery_type = oslo.SLIQueryType[metric["queryType"].replace("/", "_").upper()]
         sliquery = metric["query"]
-        slimulti_system = oslo.SLI.multi_system # get the default value from the data class
-        slimulti_system_id_fields = {} # not possible to get the default value from the data class
+        slimulti_system = oslo.SLI.multi_system # get the default value from oslo.SLI class
+        slimulti_system_columns = {} # not possible to get the default value from oslo.SLI class
         if "metadata" in metric:
             slimulti_system = metric["metadata"].get("multiSystem", slimulti_system)
-            slimulti_system_id_fields = metric["metadata"].get("multiSystemIdFields", slimulti_system_id_fields)
+            slimulti_system_columns = metric["metadata"].get("multiSystemColumns", slimulti_system_columns)
+            # TODO: support len(multiSystemColumns) > 1
+            if len(slimulti_system_columns) > 1:
+                raise oslo.OSLOElementNotSupported("metadata.multiSystemColumns currently supports only one column")
 
         newsli = oslo.SLI(type=slitype, source=slisource,
                           query_type=sliquery_type, query=sliquery,
-                          multi_system=slimulti_system, multi_system_id_fields=slimulti_system_id_fields)
+                          multi_system=slimulti_system, multi_system_columns=slimulti_system_columns)
 
         # Parse timeWindow bits
         twcount = y["spec"]["timeWindow"][0]["count"]

@@ -9,12 +9,11 @@ spec:
     thresholdMetric:
       source: test/node_temps.csv
       queryType: pandas/csv
-      # This evaluates to multiple metrics that differ by `sensor` label
+      # This evaluates to multiple metrics that differ by `sensor` column
       query: __name__ == "node_temp_celsius" and node=="klapek"
       metadata:
-        multiSystem: true # Expect to get data for an arbitrary number of (sub)systems
-        multiSystemIdFields:
-          labels: sensor # Use the `sensor` label to differentiate between systems
+        multiSystem: true # Expect to get data for an arbitrary number of systems
+        multiSystemColumns: [sensor] # Which data columns to use to differentiate between systems
   objectives:
   - op: lt
     value: 68 # °C
