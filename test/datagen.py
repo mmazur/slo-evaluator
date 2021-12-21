@@ -19,7 +19,7 @@ rng = np.random.default_rng()
 
 
 def gen_metric(count=def_count, step=def_step, metricname=def_metricname,
-               minval=def_minval, maxval=def_maxval, columns=[]):
+               minval=def_minval, maxval=def_maxval, columns=()):
     index = pd.date_range(starttime, periods=count, freq=DateOffset(seconds=step))
 
     values = pd.DataFrame(rng.integers(minval, maxval, size=(count, 1)), columns=["value"])
@@ -36,7 +36,7 @@ def gen_metric(count=def_count, step=def_step, metricname=def_metricname,
 
 
 def gen_metrics(count=def_count, step=def_step, metricname=def_metricname, minval=def_minval,
-                maxval=def_maxval, columns=[], idcolumns=[]):
+                maxval=def_maxval, columns=(), idcolumns=()):
     if idcolumns:
         dfs = []
         for header, value in idcolumns:
