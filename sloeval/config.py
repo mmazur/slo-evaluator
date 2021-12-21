@@ -17,10 +17,10 @@ def load_slo_file(path):
         y = yaml.safe_load(slofile)
 
         # Parse Indicator bits
-        if "objectiveMetric" in y["spec"]["indicator"]:
-            slitype = oslo.SLIType.OBJECTIVE
-        elif "thresholdMetric" in y["spec"]["indicator"]:
+        if "thresholdMetric" in y["spec"]["indicator"]:
             slitype = oslo.SLIType.THRESHOLD
+        #elif "objectiveMetric" in y["spec"]["indicator"]:
+        #    slitype = oslo.SLIType.OBJECTIVE
         else:
             raise oslo.OSLOElementNotSupported(
                 "Unsupported indicator type: {}".format(list(y["spec"]["indicator"].keys())))
