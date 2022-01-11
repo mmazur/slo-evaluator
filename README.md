@@ -11,8 +11,13 @@ SLO Evaluator is intended to be run at predefined intervals (like a cronjob) and
 
 ## Dev Env
 
+Requires Python >= 3.10.
+
 1. Clone this repo.
 2. Make sure you have all the python modules from `requirements.txt`.
+   ```
+   python3 -m pip install -r requirements.txt
+   ```
 3. Generate some fake data like so:
    ```
    ./test/datagen.py --id-column-header sensor --ids=cpu,system,gpu --column node=klapek --column instance="localhost:9100" -c 200000 -s 60 -o test/node_temps.csv
