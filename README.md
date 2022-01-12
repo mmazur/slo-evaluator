@@ -56,3 +56,4 @@ You should see some example SLOs being calculated from the fake data you just ge
 * [ ] Add an initial data sink.
   * SQL? Prom using [pushgateway](https://github.com/prometheus/pushgateway)?
 * [ ] Morph `objectiveMetric` in current code into whatever the new metric becomes ([discussion](https://gist.github.com/nobl9-mikec/a1a55d97d77f10216be775eaad7221ac#gistcomment-3998338)).
+* [ ] Reduce python dependency to at most 3.9, possibly earlier.
