@@ -49,7 +49,6 @@ You should see some example SLOs being calculated from the fake data you just ge
 * [ ] Add `ratioMetric` support.
 * [ ] Fully support Prometheus as a data source.
   * Waiting on [this prometheus-api-client PR](https://github.com/AICoE/prometheus-api-client-python/pull/234) to land first.
-* [ ] Add support for [Vault](https://www.vaultproject.io/) for auth token retrieval for Prom.
 * [ ] Spin off source–agnostic calculation code into its own module.
 * [ ] Add some basic cli options to `cronjob` using Click module.
   * Log level, defining where configs are, maybe something else.
