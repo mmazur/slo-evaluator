@@ -1,6 +1,6 @@
 import glob
 import logging
-import os
+from pathlib import Path
 
 import yaml
 
@@ -64,9 +64,10 @@ def load_slo_file(path):
 
 def load_configs(slopath="SLOs", sourcespath="sources"):
     """Load SLOs from a directory full of yamls."""
-    for slofile in glob.glob("*.yaml", root_dir=slopath):
+    path = Path(slopath) / '*.yaml'
+    for slofile in glob.glob(str(path)):
         try:
-            newslo = load_slo_file("{}/{}".format(slopath, slofile))
+            newslo = load_slo_file(slofile)
             if newslo:
                 SLOs.append(newslo)
         except BaseException as err:

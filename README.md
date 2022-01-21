@@ -11,7 +11,7 @@ SLO Evaluator is intended to be run at predefined intervals (like a cronjob) and
 
 ## Dev Env
 
-Requires Python >= 3.10.
+Requires Python >= 3.9.
 
 1. Clone this repo.
 2. Make sure you have all the python modules from `requirements.txt`.
